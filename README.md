@@ -1,49 +1,57 @@
 # Web Application & API Security Assessment Toolkit
 
 # Project Overview
-A comprehensive security assessment toolkit developed during my Infosys internship. This project translates manual penetration testing findings (originally discovered using Burp Suite and OWASP methodologies) into automated Python Proof-of-Concept (PoC) scripts.
+I built this project during my winter break to understand how common web vulnerabilities are detected at a practical level.
+Instead of only using tools like Burp Suite or automated scanners, I wanted to manually implement basic detection logic using Python. This helped me understand how payload injection, response analysis, and object enumeration actually work behind the scenes.
+
+The toolkit focuses on three common OWASP Top 10 issues:
+
+Error-Based SQL Injection
+Reflected Cross-Site Scripting (XSS)
+Insecure Direct Object Reference (IDOR) in APIs
+This project is intended for learning and testing in controlled environments only.
 
 # Features
-- SQL Injection Scanner: Automates detection of Error-Based SQLi vulnerabilities in URL parameters.
-- XSS Payload Tester: Verified Reflected Cross-Site Scripting (XSS) by analyzing server responses for payload reflection.
-- API Access Control Tester: Simulates IDOR (Insecure Direct Object Reference) attacks to detect Broken Access Control in API endpoints.
+1. SQL Injection Tester
+Injects common SQL payloads into URL parameters
+Checks server responses for database error patterns
+Logs potential findings into a local file
+Uses basic header simulation and timeout handling
+
+Detection Type: Error-Based SQL Injection
+
+2. Reflected XSS Tester
+Injects script payloads into input parameters
+Checks if payload appears in server response
+Uses multiple payload variations
+Performs case-insensitive matching
+
+Detection Type: Basic Reflected XSS
+
+3. API IDOR Tester
+Performs object ID enumeration (e.g., /users/{ID})
+Checks if different IDs are accessible
+Validates response status and data length
+Simulates basic unauthorized access attempts
+
+Detection Type: Basic ID Enumeration
 
 # Technologies Used
-- Python 3.x: For automation and exploit scripting.
-- Requests Library: For HTTP manipulation and API interaction.
-- OWASP Top 10: Testing methodology framework.
-- DVWA (Damn Vulnerable Web App): Sandbox environment used for initial manual testing.
+Python 3
+Requests Library
+Basic HTTP header manipulation
+OWASP Top 10 methodology (learning reference)
 
-# Installation
-1. Clone the repository:
+# LEARNING OUTCOME
+Through this project, I gained practical understanding of:
 
-   git clone [https://github.com/deepanshuj0shi/Web-Application-API-Security-Assessment.git](https://github.com/deepanshuj0shi/Web-Application-API-Security-Assessment.git)
+How user input affects backend queries
+How reflected payloads appear in HTTP responses
+How broken access control can be detected through enumeration
+How basic vulnerability detection logic works internall
 
-2. Install dependencies:
-
-pip install requests
-
-Usage
-1. SQL Injection Scan
-Tests a target URL for database errors.
-
-python src/sqli_tester.py
-
-2. XSS Scan
-Tests if a script tag is reflected in the page.
-
-python src/xss_scanner.py
-
-3. API IDOR Test
-
-Iterates through user IDs to check for unauthorized data access.
-
-python src/api_tester.py
-
-Contact
+# Contact
 
 Deepanshu Joshi
-
 Email: deepanshujoshi212@gmail.com
-
 LinkedIn: deepanshujoshi2
