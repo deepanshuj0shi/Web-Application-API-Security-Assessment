@@ -1,54 +1,69 @@
 import requests
-import sys
+import datetime
 
 def check_sqli(url):
-    print(f"\n[+] Testing {url} for SQL Injection...")
+    print(f"\nTesting {url} for possible SQL Injection...\n")
     
-    # List of common "Error-Based" SQL Injection payloads
     payloads = [
-        "'", 
-        '"', 
-        "' OR '1'='1", 
+        "'",
+        '"',
+        "' OR '1'='1",
         '" OR "1"="1'
     ]
-    
-    # Common database error messages to look for in the response
+
+    # Common database error keywords
     errors = [
-        "You have an error in your SQL syntax",
-        "Warning: mysql_",
+        "SQL syntax",
+        "mysql_",
         "Unclosed quotation mark",
         "quoted string not properly terminated"
     ]
-    
+
+    headers = {
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "text/html"
+    }
+
     vulnerable = False
 
     for payload in payloads:
-        # Construct the malicious URL (e.g., http://site.com/id=1')
         target_url = f"{url}{payload}"
-        print(f"  > Testing payload: {payload}")
-        
+        print(f"Trying payload: {payload}")
+
         try:
-            # Send the request
-            response = requests.get(target_url)
-            
-            # Check if any database error appears in the page text
+            response = requests.get(target_url, headers=headers, timeout=5)
+
             for error in errors:
-                if error in response.text:
-                    print(f"\n[!!!] VULNERABILITY FOUND!")
-                    print(f"      Payload: {payload}")
-                    print(f"      Error: {error}")
+                if error.lower() in response.text.lower():
+                    print("\nPossible SQL Injection vulnerability detected!")
+                    print(f"Payload used: {payload}")
+                    print(f"URL: {target_url}")
+
+                    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+                    with open("scan_results.txt", "a") as f:
+                        f.write(f"{current_time} - Possible SQLi at {target_url} | Payload: {payload}\n")
+
                     vulnerable = True
-                    break # Stop testing if we found one
-        except:
-            print("  [!] Connection Error")
-            
+                    break
+
+        except requests.exceptions.RequestException as e:
+            print(f"Request failed: {e}")
+
         if vulnerable:
             break
 
     if not vulnerable:
-        print("\n[-] No obvious SQL Injection errors found.")
+        print("\nNo obvious SQL errors detected.")
+
 
 if __name__ == "__main__":
-    # Ask user for input
-    target = input("Enter URL to test (e.g., http://testphp.vulnweb.com/artists.php?artist=1): ")
-    check_sqli(target)
+    print("Simple SQL Injection Tester")
+    print("Make sure the URL ends with a parameter value.\n")
+
+    target = input("Enter target URL: ").strip()
+
+    if target:
+        check_sqli(target)
+    else:
+        print("No URL entered.")
